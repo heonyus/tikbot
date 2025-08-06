@@ -1,0 +1,94 @@
+# TikBot 설정 파일
+# 이 파일을 편집하여 봇의 동작을 사용자 지정하세요.
+
+# TikTok 연결 설정
+tiktok:
+  username: "your_tiktok_username"  # ⚠️ 여기에 실제 TikTok 사용자명을 입력하세요 (@제외)
+  session_id: null  # 선택사항: 세션 ID
+  room_id: null     # 선택사항: 방 ID
+  auto_reconnect: true
+  reconnect_delay: 5
+
+# 봇 기능 설정
+features:
+  auto_response: true      # 자동 응답 활성화
+  welcome_message: true    # 환영 메시지 활성화
+  tts_enabled: false       # TTS 기능 (음성 읽기)
+  overlay_enabled: false   # 오버레이 화면
+  spam_filter: true        # 스팸 필터
+  command_processing: true # 명령어 처리
+
+# TTS (음성 읽기) 설정
+tts:
+  engine: "pyttsx3"        # TTS 엔진: pyttsx3, gtts, azure
+  voice_rate: 150          # 음성 속도
+  voice_volume: 0.8        # 음성 볼륨 (0.0-1.0)
+  language: "ko"           # 언어 코드
+  azure_key: null          # Azure Speech API 키 (선택사항)
+  azure_region: null       # Azure 지역 (선택사항)
+  auto_read_chat: false    # 일반 채팅 자동 읽기
+  max_length: 100          # 최대 읽기 길이
+  min_length: 5            # 최소 읽기 길이
+  blocked_words: ["스팸", "광고", "홍보"]  # TTS 금지어
+  vip_users: []            # TTS 우선권 사용자
+
+# 오버레이 설정
+overlay:
+  width: 800
+  height: 600
+  chat_font_size: 16
+  max_messages: 20
+  background_color: "rgba(0,0,0,0.7)"
+  text_color: "#FFFFFF"
+
+# API 서버 설정
+api:
+  enabled: true
+  host: "localhost"
+  port: 8000
+  cors_origins: ["*"]
+
+# 로깅 설정
+logging:
+  level: "INFO"
+  file_logging: true
+  log_dir: "logs"
+  max_file_size: "10MB"
+  backup_count: 5
+
+# 봇 명령어 설정
+commands:
+  "!help": "사용 가능한 명령어: !help, !info, !time, !stats, !tts"
+  "!info": "이 방송은 TikBot으로 자동화되고 있습니다! 🤖"
+  "!time": "현재 방송 시간을 확인하세요."
+  "!stats": "방송 통계를 확인하세요."
+  "!tts": "!tts 메시지 - 메시지를 음성으로 읽어줍니다 🔊"
+  "!봇": "안녕하세요! 저는 TikBot입니다 😊"
+  "!commands": "모든 명령어 목록을 확인하세요!"
+
+# 자동 응답 설정 (키워드 감지시 랜덤 응답)
+auto_responses:
+  "안녕":
+    - "안녕하세요! 👋"
+    - "반가워요!"
+    - "환영합니다! 🎉"
+  "고마워":
+    - "천만에요! 😊"
+    - "도움이 되어서 기뻐요!"
+    - "언제든지요! ✨"
+  "bye":
+    - "안녕히 가세요! 👋"
+    - "또 봐요!"
+    - "수고하셨어요! 🙏"
+  "ㅎㅎ":
+    - "ㅎㅎㅎ 😄"
+    - "재미있죠? 😆"
+    - "좋은 분위기네요! ✨"
+
+# 스팸 필터 키워드
+spam_keywords:
+  - "스팸"
+  - "광고"
+  - "홍보"
+  - "구독"
+  - "팔로우백"
