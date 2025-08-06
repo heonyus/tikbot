@@ -49,6 +49,7 @@ class TikBot:
         self._tts_manager = None
         self._audio_manager = None
         self._music_manager = None
+        self._ai_manager = None
         self._overlay_manager = None
         
         # 내부 이벤트 핸들러 등록
@@ -136,6 +137,18 @@ class TikBot:
                 # 음악 이벤트 핸들러 등록
                 self._music_manager.register_event_handlers(self.event_handler)
             
+            # AI 매니저 초기화 (Serena 연동)
+            if self.config.features.ai_enabled:
+                from ..ai.manager import AIManager
+                self._ai_manager = AIManager(
+                    config=self.config.ai.model_dump(),
+                    logger=self.logger
+                )
+                await self._ai_manager.initialize()
+                
+                # AI 이벤트 핸들러 등록
+                self._ai_manager.register_event_handlers(self.event_handler)
+            
             # Overlay 매니저 초기화 (Interactive Overlays)
             if self.config.features.overlay_enabled:
                 from ..overlay.manager import OverlayManager
@@ -195,6 +208,10 @@ class TikBot:
         # Music 매니저 종료
         if self._music_manager:
             await self._music_manager.cleanup()
+        
+        # AI 매니저 종료
+        if self._ai_manager:
+            await self._ai_manager.cleanup()
         
         # Overlay 매니저 종료
         if self._overlay_manager:

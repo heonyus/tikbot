@@ -26,6 +26,7 @@ class BotFeatures(BaseModel):
     tts_enabled: bool = Field(default=False, description="TTS 기능 활성화")
     sound_alerts_enabled: bool = Field(default=True, description="Sound Alerts 활성화")
     music_enabled: bool = Field(default=True, description="Music Integration 활성화")
+    ai_enabled: bool = Field(default=True, description="AI Chat 기능 활성화")
     overlay_enabled: bool = Field(default=False, description="오버레이 활성화")
     spam_filter: bool = Field(default=True, description="스팸 필터 활성화")
     command_processing: bool = Field(default=True, description="명령어 처리 활성화")
@@ -106,6 +107,29 @@ class MusicConfig(BaseModel):
     })
 
 
+class AIConfig(BaseModel):
+    """AI Chat 기능 설정"""
+    enabled: bool = Field(default=True, description="AI 시스템 활성화")
+    ai_response_enabled: bool = Field(default=True, description="AI 자동 응답 활성화")
+    ai_response_rate: float = Field(default=0.3, description="AI 응답 확률 (0.0-1.0)")
+    ai_response_cooldown: int = Field(default=10, description="AI 응답 쿨다운 (초)")
+    max_history: int = Field(default=200, description="최대 대화 히스토리")
+    context_window: int = Field(default=15, description="컨텍스트 윈도우 크기")
+    
+    # 스마트 기능
+    smart_auto_response: bool = Field(default=True, description="스마트 자동 응답")
+    pattern_learning: bool = Field(default=True, description="패턴 학습")
+    context_awareness: bool = Field(default=True, description="컨텍스트 인식")
+    
+    # Serena 설정
+    serena: Dict[str, Any] = Field(default_factory=lambda: {
+        "enabled": True,
+        "server_url": "http://localhost:8000",
+        "api_key": None,
+        "timeout": 30
+    })
+
+
 class LoggingConfig(BaseModel):
     """로깅 설정"""
     level: str = Field(default="INFO", description="로그 레벨")
@@ -122,6 +146,7 @@ class BotConfig(BaseModel):
     tts: TTSConfig = Field(default_factory=TTSConfig)
     audio: AudioConfig = Field(default_factory=AudioConfig)
     music: MusicConfig = Field(default_factory=MusicConfig)
+    ai: AIConfig = Field(default_factory=AIConfig)
     overlay: OverlayConfig = Field(default_factory=OverlayConfig)
     api: APIConfig = Field(default_factory=APIConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)

@@ -16,6 +16,7 @@ features:
   tts_enabled: false             # TTS 기능 (음성 읽기)
   sound_alerts_enabled: true     # Sound Alerts (효과음)
   music_enabled: true            # Music Integration (Spotify + YouTube)
+  ai_enabled: true               # AI Chat 기능 (Serena 연동)
   overlay_enabled: true          # Interactive Overlays
   spam_filter: true              # 스팸 필터
   command_processing: true       # 명령어 처리
@@ -67,6 +68,29 @@ music:
   youtube:
     enabled: true             # YouTube 검색/재생 활성화
 
+# AI Chat 기능 설정 (Serena 연동)
+ai:
+  enabled: true
+  ai_response_enabled: true        # AI 자동 응답 활성화
+  ai_response_rate: 0.3           # AI 응답 확률 (30%)
+  ai_response_cooldown: 10        # AI 응답 쿨다운 (초)
+  max_history: 200               # 최대 대화 히스토리
+  context_window: 15             # 컨텍스트 윈도우 크기
+  
+  # 스마트 기능
+  smart_auto_response: true       # 스마트 자동 응답
+  pattern_learning: true          # 패턴 학습
+  context_awareness: true         # 컨텍스트 인식
+  
+  # Serena MCP 서버 설정
+  serena:
+    enabled: true
+    server_url: "http://localhost:8000"  # Serena MCP 서버 URL
+    api_key: null                  # API 키 (선택사항)
+    timeout: 30                    # 요청 타임아웃 (초)
+    # Serena 서버 실행 방법:
+    # uvx --from git+https://github.com/oraios/serena serena start-mcp-server --transport sse --port 8000
+
 # Interactive Overlays 설정
 overlay:
   enabled: true
@@ -108,6 +132,8 @@ commands:
   "!music": "!music 아티스트 - 곡명 or URL - 음악을 요청하세요! 🎵"
   "!queue": "현재 음악 큐를 확인하세요"
   "!skip": "현재 곡을 스킵합니다 (요청자/관리자만)"
+  "!ai": "!ai 질문 - AI에게 질문하세요! 🤖"
+  "!insights": "방송 인사이트를 확인하세요 📊"
   "!봇": "안녕하세요! 저는 TikBot입니다 😊"
   "!commands": "모든 명령어 목록을 확인하세요!"
 

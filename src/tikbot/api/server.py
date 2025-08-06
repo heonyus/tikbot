@@ -452,6 +452,66 @@ def create_app(config: BotConfig, logger: logging.Logger) -> FastAPI:
         
         app.state.bot._music_manager.update_settings(settings)
         return {"message": "설정이 업데이트되었습니다", "settings": settings}
+    
+    # AI API 엔드포인트들
+    @app.get("/ai/insights")
+    async def get_ai_insights():
+        """AI 인사이트 조회"""
+        if hasattr(app.state, 'bot') and app.state.bot._ai_manager:
+            return app.state.bot._ai_manager.get_conversation_insights()
+        return {"error": "AI 시스템이 비활성화되어 있습니다"}
+    
+    @app.post("/ai/question")
+    async def ask_ai_question(question: str, username: str = "API", nickname: str = "API User"):
+        """AI에게 질문"""
+        if not hasattr(app.state, 'bot') or not app.state.bot._ai_manager:
+            raise HTTPException(status_code=503, detail="AI 시스템이 비활성화되어 있습니다")
+        
+        await app.state.bot._ai_manager._handle_ai_question(question, username, nickname)
+        return {"message": "질문이 처리되었습니다", "question": question}
+    
+    @app.get("/ai/analytics")
+    async def get_ai_analytics():
+        """AI 분석 데이터"""
+        if not hasattr(app.state, 'bot') or not app.state.bot._ai_manager:
+            raise HTTPException(status_code=503, detail="AI 시스템이 비활성화되어 있습니다")
+        
+        return app.state.bot._ai_manager.get_user_analytics()
+    
+    @app.get("/ai/stats")
+    async def get_ai_stats():
+        """AI 시스템 통계"""
+        if not hasattr(app.state, 'bot') or not app.state.bot._ai_manager:
+            raise HTTPException(status_code=503, detail="AI 시스템이 비활성화되어 있습니다")
+        
+        return app.state.bot._ai_manager.get_stats()
+    
+    @app.post("/ai/settings")
+    async def update_ai_settings(settings: dict):
+        """AI 시스템 설정 업데이트"""
+        if not hasattr(app.state, 'bot') or not app.state.bot._ai_manager:
+            raise HTTPException(status_code=503, detail="AI 시스템이 비활성화되어 있습니다")
+        
+        app.state.bot._ai_manager.update_settings(settings)
+        return {"message": "AI 설정이 업데이트되었습니다", "settings": settings}
+    
+    @app.get("/ai/performance")
+    async def get_ai_performance():
+        """AI 성능 분석"""
+        if not hasattr(app.state, 'bot') or not app.state.bot._ai_manager:
+            raise HTTPException(status_code=503, detail="AI 시스템이 비활성화되어 있습니다")
+        
+        performance = await app.state.bot._ai_manager.analyze_stream_performance()
+        return performance
+    
+    @app.get("/ai/suggestions")
+    async def get_ai_suggestions():
+        """AI 최적화 제안"""
+        if not hasattr(app.state, 'bot') or not app.state.bot._ai_manager:
+            raise HTTPException(status_code=503, detail="AI 시스템이 비활성화되어 있습니다")
+        
+        suggestions = await app.state.bot._ai_manager.get_optimization_suggestions()
+        return {"suggestions": suggestions}
         
         # 정적 파일 서빙
         try:
