@@ -24,6 +24,7 @@ class BotFeatures(BaseModel):
     auto_response: bool = Field(default=True, description="자동 응답 활성화")
     welcome_message: bool = Field(default=True, description="환영 메시지 활성화") 
     tts_enabled: bool = Field(default=False, description="TTS 기능 활성화")
+    sound_alerts_enabled: bool = Field(default=True, description="Sound Alerts 활성화")
     overlay_enabled: bool = Field(default=False, description="오버레이 활성화")
     spam_filter: bool = Field(default=True, description="스팸 필터 활성화")
     command_processing: bool = Field(default=True, description="명령어 처리 활성화")
@@ -58,6 +59,21 @@ class APIConfig(BaseModel):
     cors_origins: List[str] = Field(default=["*"], description="CORS 허용 도메인")
 
 
+class AudioConfig(BaseModel):
+    """오디오 및 Sound Alerts 설정"""
+    enabled: bool = Field(default=True, description="오디오 시스템 활성화")
+    global_volume: float = Field(default=0.7, description="전역 볼륨 (0.0-1.0)")
+    sounds_directory: str = Field(default="static/sounds", description="사운드 파일 디렉토리")
+    
+    # Sound Alerts 설정
+    sound_alerts: Dict[str, Any] = Field(default_factory=lambda: {
+        "comment_alerts": False,
+        "like_alerts": False,
+        "command_sounds": ["!effect", "!sound"],
+        "custom_alerts": {}
+    })
+
+
 class LoggingConfig(BaseModel):
     """로깅 설정"""
     level: str = Field(default="INFO", description="로그 레벨")
@@ -72,6 +88,7 @@ class BotConfig(BaseModel):
     tiktok: TikTokConfig = Field(default_factory=TikTokConfig)
     features: BotFeatures = Field(default_factory=BotFeatures)
     tts: TTSConfig = Field(default_factory=TTSConfig)
+    audio: AudioConfig = Field(default_factory=AudioConfig)
     overlay: OverlayConfig = Field(default_factory=OverlayConfig)
     api: APIConfig = Field(default_factory=APIConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)

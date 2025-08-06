@@ -47,6 +47,7 @@ class TikBot:
         
         # 봇 기능 모듈들
         self._tts_manager = None
+        self._audio_manager = None
         self._overlay_manager = None
         
         # 내부 이벤트 핸들러 등록
@@ -110,6 +111,18 @@ class TikBot:
                 )
                 await self._tts_manager.initialize()
             
+            # Audio 매니저 초기화 (Sound Alerts)
+            if self.config.features.sound_alerts_enabled:
+                from ..audio.manager import AudioManager
+                self._audio_manager = AudioManager(
+                    config=self.config.audio.model_dump(),
+                    logger=self.logger
+                )
+                await self._audio_manager.initialize()
+                
+                # 오디오 이벤트 핸들러 등록
+                self._audio_manager.register_event_handlers(self.event_handler)
+            
             # TikTok Live 클라이언트 생성
             self.client = TikTokLiveClient(unique_id=self.config.tiktok.username)
             
@@ -149,6 +162,10 @@ class TikBot:
         # TTS 매니저 종료
         if self._tts_manager:
             await self._tts_manager.stop()
+        
+        # Audio 매니저 종료
+        if self._audio_manager:
+            await self._audio_manager.cleanup()
         
         # 봇 종료 이벤트 발생
         await self.event_handler.emit_simple(EventType.BOT_STOP)

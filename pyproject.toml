@@ -24,6 +24,7 @@ dependencies = [
     "pyttsx3>=2.90",
     "gtts>=2.0.0",
     "pygame>=2.1.0",
+    "numpy>=1.21.0",
 ]
 
 [project.optional-dependencies]

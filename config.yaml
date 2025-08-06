@@ -11,12 +11,13 @@ tiktok:
 
 # 봇 기능 설정
 features:
-  auto_response: true      # 자동 응답 활성화
-  welcome_message: true    # 환영 메시지 활성화
-  tts_enabled: false       # TTS 기능 (음성 읽기)
-  overlay_enabled: false   # 오버레이 화면
-  spam_filter: true        # 스팸 필터
-  command_processing: true # 명령어 처리
+  auto_response: true            # 자동 응답 활성화
+  welcome_message: true          # 환영 메시지 활성화
+  tts_enabled: false             # TTS 기능 (음성 읽기)
+  sound_alerts_enabled: true     # Sound Alerts (효과음)
+  overlay_enabled: false         # 오버레이 화면
+  spam_filter: true              # 스팸 필터
+  command_processing: true       # 명령어 처리
 
 # TTS (음성 읽기) 설정
 tts:
@@ -31,6 +32,17 @@ tts:
   min_length: 5            # 최소 읽기 길이
   blocked_words: ["스팸", "광고", "홍보"]  # TTS 금지어
   vip_users: []            # TTS 우선권 사용자
+
+# 오디오 및 Sound Alerts 설정
+audio:
+  enabled: true
+  global_volume: 0.7       # 전역 볼륨 (0.0-1.0)
+  sounds_directory: "static/sounds"
+  sound_alerts:
+    comment_alerts: false   # 댓글에 효과음 (빈번하므로 기본 false)
+    like_alerts: false     # 좋아요에 효과음 (빈번하므로 기본 false)
+    command_sounds: ["!effect", "!sound"]  # 효과음을 재생할 명령어들
+    custom_alerts: {}      # 사용자 정의 알림 설정
 
 # 오버레이 설정
 overlay:
