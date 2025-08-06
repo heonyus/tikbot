@@ -25,6 +25,7 @@ dependencies = [
     "gtts>=2.0.0",
     "pygame>=2.1.0",
     "numpy>=1.21.0",
+    "websockets>=12.0",
 ]
 
 [project.optional-dependencies]

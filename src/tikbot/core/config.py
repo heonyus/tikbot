@@ -43,6 +43,13 @@ class TTSConfig(BaseModel):
 
 class OverlayConfig(BaseModel):
     """오버레이 설정"""
+    enabled: bool = Field(default=True, description="오버레이 시스템 활성화")
+    websocket_host: str = Field(default="localhost", description="WebSocket 서버 호스트")
+    websocket_port: int = Field(default=8080, description="WebSocket 서버 포트")
+    templates_dir: str = Field(default="templates", description="템플릿 디렉토리")
+    static_dir: str = Field(default="static", description="정적 파일 디렉토리")
+    
+    # 기존 설정들 (하위 호환성)
     width: int = Field(default=800, description="오버레이 너비")
     height: int = Field(default=600, description="오버레이 높이")
     chat_font_size: int = Field(default=16, description="채팅 폰트 크기")

@@ -123,6 +123,18 @@ class TikBot:
                 # 오디오 이벤트 핸들러 등록
                 self._audio_manager.register_event_handlers(self.event_handler)
             
+            # Overlay 매니저 초기화 (Interactive Overlays)
+            if self.config.features.overlay_enabled:
+                from ..overlay.manager import OverlayManager
+                self._overlay_manager = OverlayManager(
+                    config=self.config.overlay.model_dump(),
+                    logger=self.logger
+                )
+                await self._overlay_manager.initialize()
+                
+                # 오버레이 이벤트 핸들러 등록
+                self._overlay_manager.register_event_handlers(self.event_handler)
+            
             # TikTok Live 클라이언트 생성
             self.client = TikTokLiveClient(unique_id=self.config.tiktok.username)
             
@@ -166,6 +178,10 @@ class TikBot:
         # Audio 매니저 종료
         if self._audio_manager:
             await self._audio_manager.cleanup()
+        
+        # Overlay 매니저 종료
+        if self._overlay_manager:
+            await self._overlay_manager.cleanup()
         
         # 봇 종료 이벤트 발생
         await self.event_handler.emit_simple(EventType.BOT_STOP)

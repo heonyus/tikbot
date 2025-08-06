@@ -15,7 +15,7 @@ features:
   welcome_message: true          # 환영 메시지 활성화
   tts_enabled: false             # TTS 기능 (음성 읽기)
   sound_alerts_enabled: true     # Sound Alerts (효과음)
-  overlay_enabled: false         # 오버레이 화면
+  overlay_enabled: true          # Interactive Overlays
   spam_filter: true              # 스팸 필터
   command_processing: true       # 명령어 처리
 
@@ -44,8 +44,15 @@ audio:
     command_sounds: ["!effect", "!sound"]  # 효과음을 재생할 명령어들
     custom_alerts: {}      # 사용자 정의 알림 설정
 
-# 오버레이 설정
+# Interactive Overlays 설정
 overlay:
+  enabled: true
+  websocket_host: "localhost"
+  websocket_port: 8080
+  templates_dir: "templates"
+  static_dir: "static"
+  
+  # 기존 설정들 (하위 호환성)
   width: 800
   height: 600
   chat_font_size: 16

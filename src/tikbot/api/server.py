@@ -297,4 +297,95 @@ def create_app(config: BotConfig, logger: logging.Logger) -> FastAPI:
         
         return {"message": "자동 응답이 제거되었습니다", "keyword": keyword}
     
+    # 오버레이 라우트들
+    @app.get("/overlay/chat", response_class=HTMLResponse)
+    async def overlay_chat():
+        """채팅 오버레이"""
+        if hasattr(app.state, 'bot') and app.state.bot._overlay_manager:
+            return app.state.bot._overlay_manager.render_overlay_template("chat_overlay.html")
+        return "<html><body><h1>오버레이 시스템이 비활성화되어 있습니다</h1></body></html>"
+    
+    @app.get("/overlay/stats", response_class=HTMLResponse)
+    async def overlay_stats():
+        """통계 오버레이"""
+        if hasattr(app.state, 'bot') and app.state.bot._overlay_manager:
+            return app.state.bot._overlay_manager.render_overlay_template("stats_overlay.html")
+        return "<html><body><h1>오버레이 시스템이 비활성화되어 있습니다</h1></body></html>"
+    
+    @app.get("/overlay/goal", response_class=HTMLResponse)
+    async def overlay_goal():
+        """목표 오버레이"""
+        if hasattr(app.state, 'bot') and app.state.bot._overlay_manager:
+            return app.state.bot._overlay_manager.render_overlay_template("goal_overlay.html")
+        return "<html><body><h1>오버레이 시스템이 비활성화되어 있습니다</h1></body></html>"
+    
+    @app.get("/overlay/alerts", response_class=HTMLResponse)
+    async def overlay_alerts():
+        """알림 오버레이"""
+        if hasattr(app.state, 'bot') and app.state.bot._overlay_manager:
+            return app.state.bot._overlay_manager.render_overlay_template("alerts_overlay.html")
+        return "<html><body><h1>오버레이 시스템이 비활성화되어 있습니다</h1></body></html>"
+    
+    @app.get("/overlay/dashboard", response_class=HTMLResponse)
+    async def overlay_dashboard():
+        """통합 대시보드"""
+        if hasattr(app.state, 'bot') and app.state.bot._overlay_manager:
+            return app.state.bot._overlay_manager.render_overlay_template("dashboard.html")
+        return "<html><body><h1>오버레이 시스템이 비활성화되어 있습니다</h1></body></html>"
+    
+    @app.get("/overlay/urls")
+    async def get_overlay_urls():
+        """오버레이 URL 목록"""
+        if hasattr(app.state, 'bot') and app.state.bot._overlay_manager:
+            base_url = f"http://{config.api.host}:{config.api.port}"
+            return app.state.bot._overlay_manager.get_overlay_urls(base_url)
+        return {"error": "오버레이 시스템이 비활성화되어 있습니다"}
+    
+    @app.post("/overlay/goal")
+    async def create_custom_goal(
+        title: str,
+        description: str = "",
+        goal_type: str = "custom",
+        target: int = 100
+    ):
+        """사용자 정의 목표 생성"""
+        if not hasattr(app.state, 'bot') or not app.state.bot._overlay_manager:
+            raise HTTPException(status_code=503, detail="오버레이 시스템이 비활성화되어 있습니다")
+        
+        goal_id = app.state.bot._overlay_manager.create_custom_goal(
+            title=title,
+            description=description,
+            goal_type=goal_type,
+            target=target
+        )
+        
+        return {"message": "목표가 생성되었습니다", "goal_id": goal_id}
+    
+    @app.get("/overlay/goals")
+    async def get_goals():
+        """목표 목록 조회"""
+        if not hasattr(app.state, 'bot') or not app.state.bot._overlay_manager:
+            raise HTTPException(status_code=503, detail="오버레이 시스템이 비활성화되어 있습니다")
+        
+        overlay_manager = app.state.bot._overlay_manager
+        return {
+            "active_goals": overlay_manager.get_active_goals(),
+            "completed_goals": overlay_manager.get_completed_goals()
+        }
+    
+    @app.get("/overlay/stats")
+    async def get_overlay_stats():
+        """오버레이 시스템 통계"""
+        if not hasattr(app.state, 'bot') or not app.state.bot._overlay_manager:
+            raise HTTPException(status_code=503, detail="오버레이 시스템이 비활성화되어 있습니다")
+        
+        return app.state.bot._overlay_manager.get_stats()
+    
+    # 정적 파일 서빙
+    try:
+        app.mount("/static", StaticFiles(directory="static"), name="static")
+    except RuntimeError:
+        # static 디렉토리가 없는 경우 무시
+        pass
+    
     return app
