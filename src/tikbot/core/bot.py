@@ -50,6 +50,7 @@ class TikBot:
         self._audio_manager = None
         self._music_manager = None
         self._ai_manager = None
+        self._analytics_manager = None
         self._overlay_manager = None
         
         # 내부 이벤트 핸들러 등록
@@ -149,6 +150,18 @@ class TikBot:
                 # AI 이벤트 핸들러 등록
                 self._ai_manager.register_event_handlers(self.event_handler)
             
+            # Analytics 매니저 초기화 (데이터 분석)
+            if self.config.features.analytics_enabled:
+                from ..analytics.manager import AnalyticsManager
+                self._analytics_manager = AnalyticsManager(
+                    config=self.config.analytics.model_dump(),
+                    logger=self.logger
+                )
+                await self._analytics_manager.initialize()
+                
+                # Analytics 이벤트 핸들러 등록
+                self._analytics_manager.register_event_handlers(self.event_handler)
+            
             # Overlay 매니저 초기화 (Interactive Overlays)
             if self.config.features.overlay_enabled:
                 from ..overlay.manager import OverlayManager
@@ -212,6 +225,10 @@ class TikBot:
         # AI 매니저 종료
         if self._ai_manager:
             await self._ai_manager.cleanup()
+        
+        # Analytics 매니저 종료
+        if self._analytics_manager:
+            await self._analytics_manager.cleanup()
         
         # Overlay 매니저 종료
         if self._overlay_manager:

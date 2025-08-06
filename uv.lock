@@ -3927,6 +3927,7 @@ tts = [
 [package.metadata]
 requires-dist = [
     { name = "aiofiles" },
+    { name = "aiofiles", specifier = ">=24.0.0" },
     { name = "aiohttp", specifier = ">=3.8.0" },
     { name = "azure-cognitiveservices-speech", marker = "extra == 'tts'" },
     { name = "colorlog" },

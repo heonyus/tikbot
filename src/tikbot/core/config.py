@@ -27,6 +27,7 @@ class BotFeatures(BaseModel):
     sound_alerts_enabled: bool = Field(default=True, description="Sound Alerts 활성화")
     music_enabled: bool = Field(default=True, description="Music Integration 활성화")
     ai_enabled: bool = Field(default=True, description="AI Chat 기능 활성화")
+    analytics_enabled: bool = Field(default=True, description="Analytics 대시보드 활성화")
     overlay_enabled: bool = Field(default=False, description="오버레이 활성화")
     spam_filter: bool = Field(default=True, description="스팸 필터 활성화")
     command_processing: bool = Field(default=True, description="명령어 처리 활성화")
@@ -130,6 +131,23 @@ class AIConfig(BaseModel):
     })
 
 
+class AnalyticsConfig(BaseModel):
+    """Analytics 대시보드 설정"""
+    enabled: bool = Field(default=True, description="분석 시스템 활성화")
+    auto_session_start: bool = Field(default=True, description="자동 세션 시작")
+    real_time_analysis: bool = Field(default=True, description="실시간 분석")
+    chart_format: str = Field(default="plotly", description="차트 형식 (plotly, matplotlib, text)")
+    theme: str = Field(default="dark", description="테마 (dark, light)")
+    cache_duration: int = Field(default=60, description="캐시 지속 시간 (초)")
+    
+    # 데이터 수집 설정
+    collector: Dict[str, Any] = Field(default_factory=lambda: {
+        "data_dir": "data",
+        "buffer_size": 100,
+        "flush_interval": 60
+    })
+
+
 class LoggingConfig(BaseModel):
     """로깅 설정"""
     level: str = Field(default="INFO", description="로그 레벨")
@@ -147,6 +165,7 @@ class BotConfig(BaseModel):
     audio: AudioConfig = Field(default_factory=AudioConfig)
     music: MusicConfig = Field(default_factory=MusicConfig)
     ai: AIConfig = Field(default_factory=AIConfig)
+    analytics: AnalyticsConfig = Field(default_factory=AnalyticsConfig)
     overlay: OverlayConfig = Field(default_factory=OverlayConfig)
     api: APIConfig = Field(default_factory=APIConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)

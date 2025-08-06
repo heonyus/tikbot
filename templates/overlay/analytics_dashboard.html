@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikBot Analytics Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            overflow-x: hidden;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto auto;
+            gap: 20px;
+            padding: 20px;
+            height: 100vh;
+        }
+        
+        .header {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.8;
+        }
+        
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            grid-column: 1 / -1;
+        }
+        
+        .metric-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .metric-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        
+        .metric-value {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .metric-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .metric-trend {
+            font-size: 0.8em;
+            margin-top: 5px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            display: inline-block;
+        }
+        
+        .trend-up {
+            background: rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+        
+        .trend-down {
+            background: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+        
+        .trend-stable {
+            background: rgba(245, 158, 11, 0.3);
+            color: #f59e0b;
+        }
+        
+        .chart-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .chart-title {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .insights-panel {
+            grid-column: 1 / -1;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .insights-title {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .insight-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .insight-type {
+            font-size: 0.8em;
+            text-transform: uppercase;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+        
+        .insight-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .insight-description {
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-online {
+            background: #10b981;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+        }
+        
+        .status-warning {
+            background: #f59e0b;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+        }
+        
+        .status-offline {
+            background: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+        }
+        
+        .update-time {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .loading {
+            animation: pulse 1.5s infinite;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div class="header">
+            <h1>📊 TikBot Analytics</h1>
+            <p class="subtitle">실시간 방송 분석 대시보드</p>
+            <span class="status-indicator status-online"></span>
+            <span id="connection-status">연결됨</span>
+        </div>
+        
+        <div class="metrics-grid" id="metrics-grid">
+            <!-- 메트릭 카드들이 여기에 동적으로 추가됩니다 -->
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-title">참여도 분석</div>
+            <div id="engagement-chart"></div>
+        </div>
+        
+        <div class="chart-container">
+            <div class="chart-title">성장 트렌드</div>
+            <div id="trend-chart"></div>
+        </div>
+        
+        <div class="insights-panel">
+            <div class="insights-title">🔍 AI 인사이트</div>
+            <div id="insights-container">
+                <!-- 인사이트가 여기에 동적으로 추가됩니다 -->
+            </div>
+        </div>
+    </div>
+    
+    <div class="update-time" id="update-time">
+        마지막 업데이트: --:--
+    </div>
+
+    <script>
+        class AnalyticsDashboard {
+            constructor() {
+                this.websocket = null;
+                this.updateInterval = null;
+                this.connectionStatus = document.getElementById('connection-status');
+                this.init();
+            }
+            
+            init() {
+                this.connectWebSocket();
+                this.startPeriodicUpdate();
+                this.loadInitialData();
+            }
+            
+            connectWebSocket() {
+                const wsUrl = `ws://${window.location.hostname}:8080/analytics`;
+                this.websocket = new WebSocket(wsUrl);
+                
+                this.websocket.onopen = () => {
+                    console.log('Analytics WebSocket 연결됨');
+                    this.updateConnectionStatus('연결됨', 'online');
+                };
+                
+                this.websocket.onmessage = (event) => {
+                    const data = JSON.parse(event.data);
+                    if (data.type === 'analytics_update') {
+                        this.updateDashboard(data.data);
+                    }
+                };
+                
+                this.websocket.onclose = () => {
+                    console.log('Analytics WebSocket 연결 종료');
+                    this.updateConnectionStatus('연결 끊김', 'offline');
+                    // 5초 후 재연결 시도
+                    setTimeout(() => this.connectWebSocket(), 5000);
+                };
+                
+                this.websocket.onerror = (error) => {
+                    console.error('Analytics WebSocket 오류:', error);
+                    this.updateConnectionStatus('오류', 'warning');
+                };
+            }
+            
+            updateConnectionStatus(status, type) {
+                this.connectionStatus.textContent = status;
+                const indicator = document.querySelector('.status-indicator');
+                indicator.className = `status-indicator status-${type}`;
+            }
+            
+            async loadInitialData() {
+                try {
+                    const response = await fetch('/analytics/dashboard');
+                    const data = await response.json();
+                    this.updateDashboard(data);
+                } catch (error) {
+                    console.error('초기 데이터 로드 실패:', error);
+                }
+            }
+            
+            startPeriodicUpdate() {
+                this.updateInterval = setInterval(() => {
+                    this.loadInitialData();
+                }, 30000); // 30초마다 업데이트
+            }
+            
+            updateDashboard(data) {
+                if (data.error) {
+                    console.error('대시보드 데이터 오류:', data.error);
+                    return;
+                }
+                
+                this.updateMetrics(data);
+                this.updateCharts(data);
+                this.updateInsights(data);
+                this.updateTimestamp();
+            }
+            
+            updateMetrics(data) {
+                const metricsGrid = document.getElementById('metrics-grid');
+                const summary = data.summary || {};
+                const metrics = summary.metrics || {};
+                const statusIndicators = summary.status_indicators || [];
+                
+                metricsGrid.innerHTML = '';
+                
+                // 주요 메트릭 카드들
+                const mainMetrics = [
+                    {
+                        icon: '🔥',
+                        value: Math.round(metrics.engagement_score || 0),
+                        label: '참여도 점수',
+                        unit: '/100',
+                        trend: this.getTrend(metrics.engagement_score, 50)
+                    },
+                    {
+                        icon: '👥',
+                        value: metrics.unique_users || 0,
+                        label: '활성 사용자',
+                        unit: '명',
+                        trend: this.getTrend(metrics.unique_users, 10)
+                    },
+                    {
+                        icon: '💬',
+                        value: metrics.total_events || 0,
+                        label: '총 이벤트',
+                        unit: '개',
+                        trend: 'up'
+                    },
+                    {
+                        icon: '📈',
+                        value: Math.round(metrics.growth_score || 0),
+                        label: '성장 점수',
+                        unit: '%',
+                        trend: this.getTrend(metrics.growth_score, 0)
+                    }
+                ];
+                
+                mainMetrics.forEach(metric => {
+                    const card = this.createMetricCard(metric);
+                    metricsGrid.appendChild(card);
+                });
+            }
+            
+            createMetricCard(metric) {
+                const card = document.createElement('div');
+                card.className = 'metric-card';
+                
+                card.innerHTML = `
+                    <div class="metric-icon">${metric.icon}</div>
+                    <div class="metric-value">${metric.value}${metric.unit}</div>
+                    <div class="metric-label">${metric.label}</div>
+                    <div class="metric-trend trend-${metric.trend}">
+                        ${this.getTrendText(metric.trend)}
+                    </div>
+                `;
+                
+                return card;
+            }
+            
+            getTrend(value, threshold) {
+                if (value > threshold * 1.2) return 'up';
+                if (value < threshold * 0.8) return 'down';
+                return 'stable';
+            }
+            
+            getTrendText(trend) {
+                const texts = {
+                    up: '📈 상승',
+                    down: '📉 하락',
+                    stable: '➡️ 안정'
+                };
+                return texts[trend] || '➡️ 안정';
+            }
+            
+            updateCharts(data) {
+                // 참여도 차트
+                if (data.charts && data.charts.engagement) {
+                    this.renderChart('engagement-chart', data.charts.engagement);
+                }
+                
+                // 트렌드 차트
+                if (data.charts && data.charts.trends) {
+                    this.renderChart('trend-chart', data.charts.trends);
+                }
+            }
+            
+            renderChart(containerId, chartData) {
+                const container = document.getElementById(containerId);
+                
+                if (chartData.type === 'plotly' && chartData.chart) {
+                    // Plotly 차트 렌더링
+                    Plotly.newPlot(container, chartData.chart.data, chartData.chart.layout, {
+                        responsive: true,
+                        displayModeBar: false
+                    });
+                } else if (chartData.type === 'text') {
+                    // 텍스트 차트 대체
+                    container.innerHTML = `<pre style="color: white; font-size: 0.9em;">${chartData.content}</pre>`;
+                } else {
+                    container.innerHTML = '<p style="text-align: center; opacity: 0.7;">차트 데이터 없음</p>';
+                }
+            }
+            
+            updateInsights(data) {
+                const container = document.getElementById('insights-container');
+                const insights = data.insights || [];
+                
+                container.innerHTML = '';
+                
+                if (insights.length === 0) {
+                    container.innerHTML = '<p style="text-align: center; opacity: 0.7;">분석할 데이터가 부족합니다</p>';
+                    return;
+                }
+                
+                insights.forEach(insight => {
+                    const item = document.createElement('div');
+                    item.className = 'insight-item';
+                    
+                    item.innerHTML = `
+                        <div class="insight-type">${insight.type}</div>
+                        <div class="insight-title">${insight.title}</div>
+                        <div class="insight-description">${insight.description}</div>
+                    `;
+                    
+                    container.appendChild(item);
+                });
+            }
+            
+            updateTimestamp() {
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('ko-KR');
+                document.getElementById('update-time').textContent = `마지막 업데이트: ${timeString}`;
+            }
+        }
+        
+        // 대시보드 초기화
+        document.addEventListener('DOMContentLoaded', () => {
+            new AnalyticsDashboard();
+        });
+    </script>
+</body>
+</html>

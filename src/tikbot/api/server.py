@@ -340,6 +340,13 @@ def create_app(config: BotConfig, logger: logging.Logger) -> FastAPI:
             return app.state.bot._overlay_manager.render_overlay_template("music_overlay.html")
         return "<html><body><h1>오버레이 시스템이 비활성화되어 있습니다</h1></body></html>"
     
+    @app.get("/overlay/analytics", response_class=HTMLResponse)
+    async def overlay_analytics():
+        """분석 대시보드 오버레이"""
+        if hasattr(app.state, 'bot') and app.state.bot._overlay_manager:
+            return app.state.bot._overlay_manager.render_overlay_template("analytics_dashboard.html")
+        return "<html><body><h1>오버레이 시스템이 비활성화되어 있습니다</h1></body></html>"
+    
     @app.get("/overlay/urls")
     async def get_overlay_urls():
         """오버레이 URL 목록"""
@@ -512,6 +519,67 @@ def create_app(config: BotConfig, logger: logging.Logger) -> FastAPI:
         
         suggestions = await app.state.bot._ai_manager.get_optimization_suggestions()
         return {"suggestions": suggestions}
+    
+    # Analytics API 엔드포인트들
+    @app.get("/analytics/dashboard")
+    async def get_analytics_dashboard():
+        """실시간 분석 대시보드"""
+        if hasattr(app.state, 'bot') and app.state.bot._analytics_manager:
+            return await app.state.bot._analytics_manager.get_realtime_dashboard()
+        return {"error": "분석 시스템이 비활성화되어 있습니다"}
+    
+    @app.get("/analytics/session/{session_id}")
+    async def get_session_analytics(session_id: str):
+        """세션별 분석"""
+        if not hasattr(app.state, 'bot') or not app.state.bot._analytics_manager:
+            raise HTTPException(status_code=503, detail="분석 시스템이 비활성화되어 있습니다")
+        
+        return await app.state.bot._analytics_manager.get_session_analytics(session_id)
+    
+    @app.get("/analytics/trends")
+    async def get_analytics_trends(days: int = 7):
+        """과거 트렌드 분석"""
+        if not hasattr(app.state, 'bot') or not app.state.bot._analytics_manager:
+            raise HTTPException(status_code=503, detail="분석 시스템이 비활성화되어 있습니다")
+        
+        return await app.state.bot._analytics_manager.get_historical_trends(days)
+    
+    @app.get("/analytics/export")
+    async def export_analytics_data(session_id: str = None, format: str = "json"):
+        """분석 데이터 내보내기"""
+        if not hasattr(app.state, 'bot') or not app.state.bot._analytics_manager:
+            raise HTTPException(status_code=503, detail="분석 시스템이 비활성화되어 있습니다")
+        
+        try:
+            file_path = await app.state.bot._analytics_manager.export_analytics_data(session_id, format)
+            return {"file_path": file_path, "message": "데이터 내보내기 완료"}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+    
+    @app.get("/analytics/metrics")
+    async def get_analytics_metrics():
+        """분석 시스템 성능 메트릭"""
+        if not hasattr(app.state, 'bot') or not app.state.bot._analytics_manager:
+            raise HTTPException(status_code=503, detail="분석 시스템이 비활성화되어 있습니다")
+        
+        return await app.state.bot._analytics_manager.get_performance_metrics()
+    
+    @app.post("/analytics/settings")
+    async def update_analytics_settings(settings: dict):
+        """분석 시스템 설정 업데이트"""
+        if not hasattr(app.state, 'bot') or not app.state.bot._analytics_manager:
+            raise HTTPException(status_code=503, detail="분석 시스템이 비활성화되어 있습니다")
+        
+        app.state.bot._analytics_manager.update_settings(settings)
+        return {"message": "분석 설정이 업데이트되었습니다", "settings": settings}
+    
+    @app.get("/analytics/stats")
+    async def get_analytics_stats():
+        """분석 시스템 통계"""
+        if not hasattr(app.state, 'bot') or not app.state.bot._analytics_manager:
+            raise HTTPException(status_code=503, detail="분석 시스템이 비활성화되어 있습니다")
+        
+        return app.state.bot._analytics_manager.get_stats()
         
         # 정적 파일 서빙
         try:

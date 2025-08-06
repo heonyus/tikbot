@@ -17,6 +17,7 @@ features:
   sound_alerts_enabled: true     # Sound Alerts (효과음)
   music_enabled: true            # Music Integration (Spotify + YouTube)
   ai_enabled: true               # AI Chat 기능 (Serena 연동)
+  analytics_enabled: true        # Analytics 대시보드
   overlay_enabled: true          # Interactive Overlays
   spam_filter: true              # 스팸 필터
   command_processing: true       # 명령어 처리
@@ -91,6 +92,21 @@ ai:
     # Serena 서버 실행 방법:
     # uvx --from git+https://github.com/oraios/serena serena start-mcp-server --transport sse --port 8000
 
+# Analytics 대시보드 설정
+analytics:
+  enabled: true
+  auto_session_start: true         # 자동 세션 시작
+  real_time_analysis: true         # 실시간 분석
+  chart_format: "plotly"           # 차트 형식 (plotly, matplotlib, text)
+  theme: "dark"                    # 테마 (dark, light)
+  cache_duration: 60               # 캐시 지속 시간 (초)
+  
+  # 데이터 수집 설정
+  collector:
+    data_dir: "data"               # 데이터 저장 디렉토리
+    buffer_size: 100               # 이벤트 버퍼 크기
+    flush_interval: 60             # 데이터베이스 플러시 주기 (초)
+
 # Interactive Overlays 설정
 overlay:
   enabled: true
@@ -134,6 +150,8 @@ commands:
   "!skip": "현재 곡을 스킵합니다 (요청자/관리자만)"
   "!ai": "!ai 질문 - AI에게 질문하세요! 🤖"
   "!insights": "방송 인사이트를 확인하세요 📊"
+  "!analytics": "상세 분석 대시보드를 확인하세요 📈"
+  "!trends": "성장 트렌드를 확인하세요 📊"
   "!봇": "안녕하세요! 저는 TikBot입니다 😊"
   "!commands": "모든 명령어 목록을 확인하세요!"
 
