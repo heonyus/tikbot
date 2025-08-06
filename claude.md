@@ -856,23 +856,293 @@ curl http://localhost:8000/overlay/chat
 
 ## 🚨 **다음 AI에게 최종 당부사항**
 
+### **🛠️ Serena MCP 적극 활용 지침**
+
+#### **Serena 활용 필수 시나리오**
+```bash
+# 1. Serena MCP 서버 실행 (필수 선행 작업)
+uvx --from git+https://github.com/oraios/serena serena start-mcp-server --transport sse --port 8000
+
+# 2. Serena 코드 검색 및 분석 예시
+- "TikTokLive 연결 오류 해결 방법"
+- "FastAPI create_app 함수 문제 분석"
+- "환경변수 UTF-8 인코딩 문제 수정"
+- "Python 비동기 프로그래밍 최적화"
+```
+
+#### **Serena로 해결해야 할 핵심 문제들**
+1. **🔥 즉시 해결 필요 (Priority 1)**
+   - `.env` 파일 UTF-8 인코딩 문제 완전 해결
+   - `demo_run.py` FastAPI 앱 생성 실패 수정
+   - `create_app` 함수가 None 반환하는 원인 분석
+   - API 서버 포트 8000 바인딩 실패 해결
+
+2. **🎯 핵심 기능 구현 (Priority 2)**
+   - TikTokLive 실시간 연결 안정화
+   - 50+개 명령어 시스템 구현
+   - 음악 통합 (Spotify + YouTube) 완성
+   - 오버레이 WebSocket 실시간 통신
+
+3. **🚀 고급 기능 추가 (Priority 3)**
+   - AI 채팅 응답 (Serena 연동)
+   - 게임 시스템 (슬롯, 룰렛, 포인트)
+   - Analytics 대시보드 (실시간 차트)
+   - 포인트 경제 시스템
+
+### **🌐 완전한 배포 파이프라인 구축**
+
+#### **1. Git 관리 및 지속적 커밋**
+```bash
+# 매 기능 완성시마다 반드시 커밋
+git add .
+git commit -m "feat: [기능명] 구현 완료 - [상세 설명]"
+git push origin main
+
+# 커밋 메시지 예시
+git commit -m "fix: .env 인코딩 문제 해결 - UTF-8 BOM 제거 및 안전한 로딩 구현"
+git commit -m "feat: TikTok Live 연결 완료 - 실시간 채팅/선물/팔로우 이벤트 처리"
+git commit -m "feat: 음악 시스템 완성 - Spotify/YouTube 검색 및 재생 큐"
+```
+
+#### **2. Vercel 자동 배포 설정**
+```bash
+# Vercel 프로젝트 생성 및 배포
+npm i -g vercel
+vercel login
+vercel --prod
+
+# vercel.json 설정 파일 생성 필요
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "src/tikbot/main.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "src/tikbot/main.py"
+    }
+  ]
+}
+```
+
+#### **3. Supabase 데이터베이스 연결**
+```sql
+-- Supabase에서 실행할 테이블 생성 스크립트
+CREATE TABLE users (
+    id VARCHAR(50) PRIMARY KEY,
+    username VARCHAR(100) NOT NULL,
+    display_name VARCHAR(100),
+    points INTEGER DEFAULT 0,
+    experience INTEGER DEFAULT 0,
+    level INTEGER DEFAULT 1,
+    vip_status BOOLEAN DEFAULT FALSE,
+    banned BOOLEAN DEFAULT FALSE,
+    timeout_until TIMESTAMP NULL,
+    first_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    total_messages INTEGER DEFAULT 0,
+    total_watch_time INTEGER DEFAULT 0
+);
+
+-- 추가 테이블들 (claude.md의 데이터베이스 스키마 참조)
+```
+
+```python
+# Supabase 연결 설정 (.env에 추가)
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
+SUPABASE_SERVICE_KEY=your-service-key
+
+# Python 코드에서 Supabase 클라이언트 사용
+from supabase import create_client, Client
+supabase: Client = create_client(supabase_url, supabase_key)
+```
+
+#### **4. 환경변수 보안 관리**
+```bash
+# Vercel 환경변수 설정
+vercel env add TIKTOK_USERNAME
+vercel env add SUPABASE_URL
+vercel env add SUPABASE_ANON_KEY
+vercel env add SPOTIFY_CLIENT_ID
+vercel env add SPOTIFY_CLIENT_SECRET
+
+# GitHub Secrets 설정 (CI/CD용)
+VERCEL_TOKEN
+SUPABASE_ACCESS_TOKEN
+```
+
+### **⚡ 개발 프로세스 및 검증 단계**
+
+#### **Phase 1: 기반 인프라 수정 (1-2시간)**
+```bash
+# 1. 환경 설정 완전 해결
+✅ .env 파일 UTF-8 인코딩 문제 100% 해결
+✅ FastAPI create_app 함수 정상 작동 확인
+✅ 포트 8000 API 서버 정상 바인딩
+
+# 검증 명령어
+uv run python -m src.tikbot.main  # 오류 없이 실행
+curl http://localhost:8000/status  # JSON 응답 확인
+```
+
+#### **Phase 2: 핵심 기능 구현 (3-4시간)**
+```bash
+# 2. TikTok Live 연결 및 기본 기능
+✅ TikTokLive 실시간 이벤트 수신 (댓글, 선물, 팔로우)
+✅ 기본 명령어 시스템 (10개 이상)
+✅ 웹 대시보드 정상 표시
+✅ 오버레이 시스템 기본 작동
+
+# 검증 방법
+TikTok Live 채팅에서 !help 입력 → 봇 응답 확인
+http://localhost:8000/overlay/chat → 실시간 채팅 표시
+```
+
+#### **Phase 3: 고급 기능 추가 (4-6시간)**
+```bash
+# 3. 음악, AI, 게임 시스템
+✅ Spotify + YouTube 음악 통합
+✅ AI 채팅 (Serena MCP 연동)
+✅ 게임 시스템 (슬롯, 룰렛, 포인트)
+✅ Analytics 실시간 대시보드
+
+# 검증 방법
+!music 아이유 좋은날 → 음악 재생 확인
+!ai 안녕하세요 → AI 응답 확인
+!슬롯 → 게임 결과 표시
+```
+
+#### **Phase 4: 배포 및 운영 (1-2시간)**
+```bash
+# 4. 프로덕션 배포
+✅ Supabase 데이터베이스 연결
+✅ Vercel 자동 배포 설정
+✅ 환경변수 보안 설정
+✅ 도메인 및 SSL 인증서
+
+# 최종 검증
+https://tikbot.vercel.app/status → 프로덕션 API 확인
+TikTok Live 실제 방송에서 봇 작동 확인
+```
+
+### **🎯 성공 시나리오 체크리스트**
+
+#### **단계별 필수 완료 조건**
+- [ ] **Phase 1 완료**: 로컬에서 `uv run python -m src.tikbot.main` 100% 성공
+- [ ] **Phase 2 완료**: TikTok Live 연결 및 기본 명령어 작동
+- [ ] **Phase 3 완료**: 모든 고급 기능 데모 레벨 이상 작동
+- [ ] **Phase 4 완료**: Vercel 배포 및 실제 사용자 접근 가능
+
+#### **최종 제출물**
+1. **완전히 작동하는 TikBot** (로컬 + 프로덕션)
+2. **Vercel 배포 URL** (공개 접근 가능)
+3. **Supabase 데이터베이스** (실시간 데이터 저장)
+4. **완성된 GitHub 저장소** (모든 코드 + 문서)
+5. **사용자 가이드** (설치부터 사용까지)
+
 ### **절대 실패하면 안 되는 것들**
 1. **실행 불가**: `uv run python -m src.tikbot.main` 명령어는 반드시 작동해야 함
 2. **웹 접속 불가**: `http://localhost:8000` 접속은 반드시 성공해야 함  
 3. **오류 메시지**: 사용자가 오류를 보면 안 됨 (모든 예외 처리 필수)
 4. **기능 미완성**: 약속한 기능은 모두 작동해야 함 (데모라도 구현)
+5. **배포 실패**: Vercel 배포는 반드시 성공해야 함
 
 ### **성공을 위한 개발 전략**
-1. **MVP 우선**: 핵심 기능부터 완전히 작동시키기
-2. **단계별 검증**: 각 단계마다 실행 테스트 필수  
-3. **오류 방지**: 모든 예외 상황 처리 (try-catch)
-4. **사용자 친화적**: 에러 대신 친절한 안내 메시지
+1. **Serena MCP 적극 활용**: 모든 문제 해결에 Serena 검색 및 분석 사용
+2. **MVP 우선**: 핵심 기능부터 완전히 작동시키기
+3. **단계별 검증**: 각 단계마다 실행 테스트 필수  
+4. **지속적 배포**: 매 기능 완성시마다 Git 커밋 + Vercel 배포
+5. **오류 방지**: 모든 예외 상황 처리 (try-catch)
+6. **사용자 친화적**: 에러 대신 친절한 안내 메시지
 
 ### **코드 품질보다 중요한 것**
 - **실제 작동 여부**가 코드 아름다움보다 100배 중요
 - **사용자가 실제로 사용할 수 있는지**가 핵심
 - **완벽한 설계**보다는 **작동하는 프로토타입**
 - **모든 기능**보다는 **핵심 기능의 완벽한 작동**
+- **로컬 작동**뿐만 아니라 **프로덕션 배포**까지 완성
+
+---
+
+---
+
+## 🤖 **다음 AI 어시스턴트를 위한 완벽한 프롬프트**
+
+### **📝 복사해서 사용할 프롬프트**
+
+```
+안녕하세요! 저는 TikTok Live 방송 자동화 봇(TikBot) 프로젝트를 완성해야 합니다.
+
+**현재 상황:**
+- C:\projects\tikbot 폴더에 프로젝트가 있습니다
+- claude.md 파일에 완전한 기능 명세서(884줄)가 작성되어 있습니다
+- 현재 .env 인코딩 문제와 FastAPI 앱 생성 오류로 실행이 안 됩니다
+
+**요청사항:**
+1. **Serena MCP 활용**: uvx --from git+https://github.com/oraios/serena serena start-mcp-server --transport sse --port 8000 으로 Serena를 실행하고 모든 문제 해결에 적극 활용해주세요
+
+2. **4단계 완성**:
+   - Phase 1: 환경 설정 문제 완전 해결 (.env, FastAPI 앱 생성)
+   - Phase 2: TikTok Live 연결 및 기본 기능 (10+개 명령어)
+   - Phase 3: 고급 기능 (음악, AI, 게임, Analytics)
+   - Phase 4: Vercel 배포 + Supabase 연결 + 프로덕션 완성
+
+3. **필수 성공 조건**:
+   - `uv run python -m src.tikbot.main` 100% 작동
+   - `http://localhost:8000` 정상 접속
+   - TikTok Live 실시간 연결 성공
+   - 50+개 명령어 시스템 작동
+   - 10종 오버레이 정상 표시
+   - Vercel 프로덕션 배포 완료
+
+4. **TikFinity 대체 기능**:
+   - Sound Alerts (7가지 효과음)
+   - TTS 시스템 (다국어, 속도/피치 조절)
+   - Interactive Overlays (실시간 WebSocket)
+   - Chatbot (스팸 필터, 자동 응답)
+   - Music Player (Spotify + YouTube)
+   - Analytics (실시간 차트, 수익 추적)
+   - 게임 시스템 (슬롯, 룰렛, 포인트)
+
+5. **지속적 Git 관리**:
+   매 기능 완성시마다 반드시 git commit + push
+   
+6. **최종 목표**:
+   사용자가 "와! TikFinity보다 훨씬 좋네요! 월 $200 절약됐어요!" 라고 말할 수 있는 완성품
+
+**중요**: claude.md 파일을 꼭 읽어보시고, 모든 세부 사항을 참고해서 완벽하게 완성해주세요. 실행 가능성이 가장 중요합니다!
+```
+
+### **🎯 핵심 키워드 (AI가 놓치지 말아야 할 것들)**
+- **Serena MCP 필수 사용**
+- **.env UTF-8 인코딩 문제 해결**
+- **FastAPI create_app 오류 수정**
+- **TikTokLive 실시간 연결**
+- **50+개 명령어 시스템**
+- **Vercel 자동 배포**
+- **Supabase 데이터베이스 연결**
+- **월 $263 경제적 가치 달성**
+
+### **📋 체크리스트 (AI가 완료해야 할 것들)**
+- [ ] Serena MCP 서버 실행 및 활용
+- [ ] .env 인코딩 문제 100% 해결
+- [ ] `uv run python -m src.tikbot.main` 성공
+- [ ] TikTok Live 실시간 연결 확인
+- [ ] 웹 대시보드 http://localhost:8000 접속
+- [ ] 10종 오버레이 모두 작동 확인
+- [ ] 50+개 명령어 구현 및 테스트
+- [ ] Spotify + YouTube 음악 통합
+- [ ] AI 채팅 응답 (Serena 연동)
+- [ ] 게임 시스템 (슬롯, 룰렛)
+- [ ] Analytics 실시간 대시보드
+- [ ] Supabase 데이터베이스 연결
+- [ ] Vercel 프로덕션 배포
+- [ ] 최종 사용자 테스트 성공
 
 ---
 
@@ -880,4 +1150,6 @@ curl http://localhost:8000/overlay/chat
 👤 **요청자:** TikTok Live 방송 자동화를 원하는 사용자  
 🎯 **목표:** 완전히 작동하는 무료 TikBot 완성  
 ⚡ **우선순위:** 실행 가능성 > 기능 완성도 > 코드 품질  
-🎊 **성공 조건:** 사용자가 "와! 정말 잘 되네요!" 라고 감탄할 수 있어야 함
+🎊 **성공 조건:** 사용자가 "와! 정말 잘 되네요!" 라고 감탄할 수 있어야 함  
+🚀 **Serena MCP:** 모든 문제 해결에 적극 활용 필수  
+🌐 **최종 목표:** Vercel 배포 + Supabase 연결 + 프로덕션 운영
