@@ -15,6 +15,7 @@ features:
   welcome_message: true          # 환영 메시지 활성화
   tts_enabled: false             # TTS 기능 (음성 읽기)
   sound_alerts_enabled: true     # Sound Alerts (효과음)
+  music_enabled: true            # Music Integration (Spotify + YouTube)
   overlay_enabled: true          # Interactive Overlays
   spam_filter: true              # 스팸 필터
   command_processing: true       # 명령어 처리
@@ -43,6 +44,28 @@ audio:
     like_alerts: false     # 좋아요에 효과음 (빈번하므로 기본 false)
     command_sounds: ["!effect", "!sound"]  # 효과음을 재생할 명령어들
     custom_alerts: {}      # 사용자 정의 알림 설정
+
+# Music Integration 설정 (Spotify + YouTube)
+music:
+  enabled: true
+  auto_play: true              # 자동 재생
+  allow_explicit: false        # 성인 콘텐츠 허용
+  max_queue_size: 50          # 최대 큐 크기
+  max_duration: 600           # 최대 곡 길이 (10분)
+  max_requests_per_user: 3    # 사용자당 최대 요청 수
+  admin_users: []             # 관리자 사용자 (스킵/큐 관리 권한)
+  blocked_keywords: ["inappropriate", "spam"]  # 금지어
+  
+  # Spotify 설정
+  spotify:
+    enabled: true
+    client_id: null           # Spotify API Client ID (필수)
+    client_secret: null       # Spotify API Client Secret (필수)
+    # 발급: https://developer.spotify.com/dashboard/applications
+  
+  # YouTube 설정
+  youtube:
+    enabled: true             # YouTube 검색/재생 활성화
 
 # Interactive Overlays 설정
 overlay:
@@ -77,11 +100,14 @@ logging:
 
 # 봇 명령어 설정
 commands:
-  "!help": "사용 가능한 명령어: !help, !info, !time, !stats, !tts"
+  "!help": "사용 가능한 명령어: !help, !info, !time, !stats, !music, !queue"
   "!info": "이 방송은 TikBot으로 자동화되고 있습니다! 🤖"
   "!time": "현재 방송 시간을 확인하세요."
   "!stats": "방송 통계를 확인하세요."
   "!tts": "!tts 메시지 - 메시지를 음성으로 읽어줍니다 🔊"
+  "!music": "!music 아티스트 - 곡명 or URL - 음악을 요청하세요! 🎵"
+  "!queue": "현재 음악 큐를 확인하세요"
+  "!skip": "현재 곡을 스킵합니다 (요청자/관리자만)"
   "!봇": "안녕하세요! 저는 TikBot입니다 😊"
   "!commands": "모든 명령어 목록을 확인하세요!"
 

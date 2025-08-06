@@ -25,6 +25,12 @@ class EventType(Enum):
     BOT_START = "bot_start"
     BOT_STOP = "bot_stop"
     COMMAND = "command"
+    
+    # Music Events
+    MUSIC_REQUEST_ADDED = "music_request_added"
+    MUSIC_SONG_STARTED = "music_song_started"
+    MUSIC_SONG_ENDED = "music_song_ended"
+    MUSIC_QUEUE_UPDATED = "music_queue_updated"
     AUTO_RESPONSE = "auto_response"
     SPAM_DETECTED = "spam_detected"
     

@@ -25,6 +25,7 @@ class BotFeatures(BaseModel):
     welcome_message: bool = Field(default=True, description="환영 메시지 활성화") 
     tts_enabled: bool = Field(default=False, description="TTS 기능 활성화")
     sound_alerts_enabled: bool = Field(default=True, description="Sound Alerts 활성화")
+    music_enabled: bool = Field(default=True, description="Music Integration 활성화")
     overlay_enabled: bool = Field(default=False, description="오버레이 활성화")
     spam_filter: bool = Field(default=True, description="스팸 필터 활성화")
     command_processing: bool = Field(default=True, description="명령어 처리 활성화")
@@ -81,6 +82,30 @@ class AudioConfig(BaseModel):
     })
 
 
+class MusicConfig(BaseModel):
+    """Music Integration 설정"""
+    enabled: bool = Field(default=True, description="음악 시스템 활성화")
+    auto_play: bool = Field(default=True, description="자동 재생")
+    allow_explicit: bool = Field(default=False, description="성인 콘텐츠 허용")
+    max_queue_size: int = Field(default=50, description="최대 큐 크기")
+    max_duration: int = Field(default=600, description="최대 곡 길이 (초)")
+    max_requests_per_user: int = Field(default=3, description="사용자당 최대 요청 수")
+    admin_users: List[str] = Field(default=[], description="관리자 사용자 목록")
+    blocked_keywords: List[str] = Field(default=[], description="금지어 목록")
+    
+    # Spotify 설정
+    spotify: Dict[str, Any] = Field(default_factory=lambda: {
+        "enabled": True,
+        "client_id": None,
+        "client_secret": None
+    })
+    
+    # YouTube 설정  
+    youtube: Dict[str, Any] = Field(default_factory=lambda: {
+        "enabled": True
+    })
+
+
 class LoggingConfig(BaseModel):
     """로깅 설정"""
     level: str = Field(default="INFO", description="로그 레벨")
@@ -96,6 +121,7 @@ class BotConfig(BaseModel):
     features: BotFeatures = Field(default_factory=BotFeatures)
     tts: TTSConfig = Field(default_factory=TTSConfig)
     audio: AudioConfig = Field(default_factory=AudioConfig)
+    music: MusicConfig = Field(default_factory=MusicConfig)
     overlay: OverlayConfig = Field(default_factory=OverlayConfig)
     api: APIConfig = Field(default_factory=APIConfig)
     logging: LoggingConfig = Field(default_factory=LoggingConfig)

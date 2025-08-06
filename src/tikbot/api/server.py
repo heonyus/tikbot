@@ -333,6 +333,13 @@ def create_app(config: BotConfig, logger: logging.Logger) -> FastAPI:
             return app.state.bot._overlay_manager.render_overlay_template("dashboard.html")
         return "<html><body><h1>오버레이 시스템이 비활성화되어 있습니다</h1></body></html>"
     
+    @app.get("/overlay/music", response_class=HTMLResponse)
+    async def overlay_music():
+        """음악 플레이어 오버레이"""
+        if hasattr(app.state, 'bot') and app.state.bot._overlay_manager:
+            return app.state.bot._overlay_manager.render_overlay_template("music_overlay.html")
+        return "<html><body><h1>오버레이 시스템이 비활성화되어 있습니다</h1></body></html>"
+    
     @app.get("/overlay/urls")
     async def get_overlay_urls():
         """오버레이 URL 목록"""
@@ -381,11 +388,76 @@ def create_app(config: BotConfig, logger: logging.Logger) -> FastAPI:
         
         return app.state.bot._overlay_manager.get_stats()
     
-    # 정적 파일 서빙
-    try:
-        app.mount("/static", StaticFiles(directory="static"), name="static")
-    except RuntimeError:
-        # static 디렉토리가 없는 경우 무시
-        pass
+    # Music API 엔드포인트들
+    @app.get("/music/queue")
+    async def get_music_queue():
+        """음악 큐 조회"""
+        if hasattr(app.state, 'bot') and app.state.bot._music_manager:
+            return app.state.bot._music_manager.get_queue_info()
+        return {"error": "음악 시스템이 비활성화되어 있습니다"}
     
-    return app
+    @app.post("/music/request")
+    async def request_music(query: str, requester: str = "API", requester_nickname: str = "API User"):
+        """음악 요청"""
+        if not hasattr(app.state, 'bot') or not app.state.bot._music_manager:
+            raise HTTPException(status_code=503, detail="음악 시스템이 비활성화되어 있습니다")
+        
+        result = await app.state.bot._music_manager.request_song(query, requester, requester_nickname)
+        if not result["success"]:
+            raise HTTPException(status_code=400, detail=result["error"])
+        
+        return result
+    
+    @app.post("/music/skip")
+    async def skip_music(requester: str = "API"):
+        """현재 곡 스킵"""
+        if not hasattr(app.state, 'bot') or not app.state.bot._music_manager:
+            raise HTTPException(status_code=503, detail="음악 시스템이 비활성화되어 있습니다")
+        
+        # API 요청은 관리자 권한으로 처리
+        result = await app.state.bot._music_manager.skip_current_song("API 요청")
+        return {"success": result, "message": "곡이 스킵되었습니다" if result else "스킵할 곡이 없습니다"}
+    
+    @app.get("/music/search")
+    async def search_music(query: str, platform: str = "auto", limit: int = 10):
+        """음악 검색"""
+        if not hasattr(app.state, 'bot') or not app.state.bot._music_manager:
+            raise HTTPException(status_code=503, detail="음악 시스템이 비활성화되어 있습니다")
+        
+        results = await app.state.bot._music_manager.search_music(query, platform, limit)
+        return {"results": results, "total": len(results)}
+    
+    @app.get("/music/history")
+    async def get_music_history(limit: int = 20):
+        """음악 재생 히스토리"""
+        if not hasattr(app.state, 'bot') or not app.state.bot._music_manager:
+            raise HTTPException(status_code=503, detail="음악 시스템이 비활성화되어 있습니다")
+        
+        history = app.state.bot._music_manager.get_history(limit)
+        return {"history": history}
+    
+    @app.get("/music/stats")
+    async def get_music_stats():
+        """음악 시스템 통계"""
+        if not hasattr(app.state, 'bot') or not app.state.bot._music_manager:
+            raise HTTPException(status_code=503, detail="음악 시스템이 비활성화되어 있습니다")
+        
+        return app.state.bot._music_manager.get_stats()
+    
+    @app.post("/music/settings")
+    async def update_music_settings(settings: dict):
+        """음악 시스템 설정 업데이트"""
+        if not hasattr(app.state, 'bot') or not app.state.bot._music_manager:
+            raise HTTPException(status_code=503, detail="음악 시스템이 비활성화되어 있습니다")
+        
+        app.state.bot._music_manager.update_settings(settings)
+        return {"message": "설정이 업데이트되었습니다", "settings": settings}
+        
+        # 정적 파일 서빙
+        try:
+            app.mount("/static", StaticFiles(directory="static"), name="static")
+        except RuntimeError:
+            # static 디렉토리가 없는 경우 무시
+            pass
+        
+        return app

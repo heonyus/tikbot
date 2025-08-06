@@ -48,6 +48,7 @@ class TikBot:
         # 봇 기능 모듈들
         self._tts_manager = None
         self._audio_manager = None
+        self._music_manager = None
         self._overlay_manager = None
         
         # 내부 이벤트 핸들러 등록
@@ -123,6 +124,18 @@ class TikBot:
                 # 오디오 이벤트 핸들러 등록
                 self._audio_manager.register_event_handlers(self.event_handler)
             
+            # Music 매니저 초기화 (Spotify + YouTube)
+            if self.config.features.music_enabled:
+                from ..music.manager import MusicManager
+                self._music_manager = MusicManager(
+                    config=self.config.music.model_dump(),
+                    logger=self.logger
+                )
+                await self._music_manager.initialize()
+                
+                # 음악 이벤트 핸들러 등록
+                self._music_manager.register_event_handlers(self.event_handler)
+            
             # Overlay 매니저 초기화 (Interactive Overlays)
             if self.config.features.overlay_enabled:
                 from ..overlay.manager import OverlayManager
@@ -178,6 +191,10 @@ class TikBot:
         # Audio 매니저 종료
         if self._audio_manager:
             await self._audio_manager.cleanup()
+        
+        # Music 매니저 종료
+        if self._music_manager:
+            await self._music_manager.cleanup()
         
         # Overlay 매니저 종료
         if self._overlay_manager:
