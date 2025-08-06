@@ -1,0 +1,283 @@
+/* TikBot 오버레이 스타일 */
+
+body.overlay-body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: transparent;
+    color: #ffffff;
+    overflow: hidden;
+}
+
+/* 오버레이 공통 스타일 */
+.overlay-title {
+    color: #00d4ff;
+    margin: 0 0 15px 0;
+    font-size: 20px;
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+/* 채팅 오버레이 */
+.chat-container {
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    padding: 15px;
+    max-width: 400px;
+    max-height: 500px;
+    border: 2px solid #00d4ff;
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+}
+
+.chat-messages {
+    height: 400px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #00d4ff transparent;
+}
+
+.chat-messages::-webkit-scrollbar {
+    width: 8px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: #00d4ff;
+    border-radius: 4px;
+}
+
+.chat-message {
+    margin-bottom: 12px;
+    padding: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    border-left: 3px solid #00d4ff;
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.username {
+    font-weight: bold;
+    color: #00d4ff;
+}
+
+.timestamp {
+    font-size: 12px;
+    color: #888;
+}
+
+.message-content {
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+/* 통계 오버레이 */
+.stats-container {
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    padding: 15px;
+    border: 2px solid #00d4ff;
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    background: rgba(0, 212, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.stat-icon {
+    font-size: 24px;
+    margin-bottom: 8px;
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: bold;
+    color: #00d4ff;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #ccc;
+}
+
+/* 목표 오버레이 */
+.goal-container {
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    padding: 15px;
+    max-width: 350px;
+    border: 2px solid #00d4ff;
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+}
+
+.goal-info {
+    margin-bottom: 15px;
+}
+
+.goal-title {
+    font-size: 18px;
+    font-weight: bold;
+    color: #00d4ff;
+    margin-bottom: 5px;
+}
+
+.goal-description {
+    font-size: 14px;
+    color: #ccc;
+}
+
+.progress-container {
+    margin-top: 15px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #00d4ff, #0099cc);
+    border-radius: 10px;
+    transition: width 0.5s ease;
+    position: relative;
+}
+
+.progress-fill.goal-completed {
+    background: linear-gradient(90deg, #00ff88, #00cc66);
+    animation: goalGlow 1s infinite alternate;
+}
+
+@keyframes goalGlow {
+    from { box-shadow: 0 0 5px rgba(0, 255, 136, 0.5); }
+    to { box-shadow: 0 0 20px rgba(0, 255, 136, 0.8); }
+}
+
+.progress-text {
+    text-align: center;
+    font-size: 14px;
+    color: #ccc;
+}
+
+.goal-achieved {
+    animation: goalAchieved 2s ease;
+}
+
+@keyframes goalAchieved {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+/* 알림 오버레이 */
+.alerts-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 350px;
+    pointer-events: none;
+}
+
+.alert {
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border-left: 4px solid #00d4ff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.5s ease;
+}
+
+.alert.alert-show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.alert.alert-hide {
+    transform: translateX(100%);
+    opacity: 0;
+}
+
+.alert-follow {
+    border-left-color: #ff6b6b;
+}
+
+.alert-gift {
+    border-left-color: #ffd93d;
+}
+
+/* 최근 알림 (대시보드용) */
+.recent-alert {
+    padding: 10px;
+    margin-bottom: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    border-left: 3px solid #00d4ff;
+}
+
+.recent-alert.alert-follow {
+    border-left-color: #ff6b6b;
+}
+
+.recent-alert.alert-gift {
+    border-left-color: #ffd93d;
+}
+
+.alert-content {
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.alert-time {
+    font-size: 12px;
+    color: #888;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .chat-container,
+    .stats-container,
+    .goal-container {
+        max-width: 100%;
+        margin: 10px;
+    }
+    
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: repeat(4, auto);
+    }
+}

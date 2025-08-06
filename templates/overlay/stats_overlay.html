@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikBot - 통계 오버레이</title>
+    <link rel="stylesheet" href="/static/css/overlay.css">
+</head>
+<body class="overlay-body">
+    <div id="stats-container" class="stats-container">
+        <h3 class="overlay-title">📊 실시간 통계</h3>
+        
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-icon">💬</div>
+                <div class="stat-value" id="messages-count">0</div>
+                <div class="stat-label">메시지</div>
+            </div>
+            
+            <div class="stat-item">
+                <div class="stat-icon">👥</div>
+                <div class="stat-value" id="followers-count">0</div>
+                <div class="stat-label">팔로워</div>
+            </div>
+            
+            <div class="stat-item">
+                <div class="stat-icon">🎁</div>
+                <div class="stat-value" id="gifts-count">0</div>
+                <div class="stat-label">선물</div>
+            </div>
+            
+            <div class="stat-item">
+                <div class="stat-icon">⏱️</div>
+                <div class="stat-value" id="uptime">00:00:00</div>
+                <div class="stat-label">방송시간</div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/js/overlay-websocket.js"></script>
+    <script>
+        const statsOverlay = new OverlayWebSocket('{{ websocket_url }}');
+        
+        statsOverlay.on('stats_update', function(data) {
+            updateStats(data);
+        });
+        
+        function updateStats(stats) {
+            document.getElementById('messages-count').textContent = 
+                stats.messages_received || 0;
+            document.getElementById('followers-count').textContent = 
+                stats.followers_gained || 0;
+            document.getElementById('gifts-count').textContent = 
+                stats.gifts_received || 0;
+            
+            if (stats.uptime) {
+                document.getElementById('uptime').textContent = stats.uptime;
+            }
+        }
+        
+        // 업타임 카운터 (서버에서 받지 않는 경우)
+        let startTime = Date.now();
+        setInterval(() => {
+            const elapsed = Date.now() - startTime;
+            const hours = Math.floor(elapsed / 3600000);
+            const minutes = Math.floor((elapsed % 3600000) / 60000);
+            const seconds = Math.floor((elapsed % 60000) / 1000);
+            
+            const uptime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            if (!document.getElementById('uptime').textContent.includes(':')) {
+                document.getElementById('uptime').textContent = uptime;
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

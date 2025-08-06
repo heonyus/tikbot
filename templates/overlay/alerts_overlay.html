@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikBot - 알림 오버레이</title>
+    <link rel="stylesheet" href="/static/css/overlay.css">
+</head>
+<body class="overlay-body">
+    <div id="alerts-container" class="alerts-container">
+        <!-- 알림들이 여기에 표시됩니다 -->
+    </div>
+    
+    <script src="/static/js/overlay-websocket.js"></script>
+    <script>
+        const alertsOverlay = new OverlayWebSocket('{{ websocket_url }}');
+        
+        alertsOverlay.on('new_follow', function(data) {
+            showAlert('follow', `🎉 ${data.nickname}님이 팔로우했습니다!`);
+        });
+        
+        alertsOverlay.on('new_gift', function(data) {
+            const message = `🎁 ${data.nickname}님이 ${data.gift_name} ${data.gift_count}개를 보냈습니다!`;
+            showAlert('gift', message);
+        });
+        
+        function showAlert(type, message) {
+            const container = document.getElementById('alerts-container');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            
+            container.appendChild(alertDiv);
+            
+            // 애니메이션
+            setTimeout(() => {
+                alertDiv.classList.add('alert-show');
+            }, 10);
+            
+            // 5초 후 제거
+            setTimeout(() => {
+                alertDiv.classList.add('alert-hide');
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        alertDiv.parentNode.removeChild(alertDiv);
+                    }
+                }, 500);
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikBot - 방송 대시보드</title>
+    <link rel="stylesheet" href="/static/css/overlay.css">
+    <style>
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: auto auto;
+            gap: 20px;
+            padding: 20px;
+            height: 100vh;
+            box-sizing: border-box;
+        }
+        
+        .dashboard-section {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            padding: 15px;
+            border: 2px solid #00d4ff;
+        }
+        
+        .section-title {
+            color: #00d4ff;
+            margin-bottom: 15px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="overlay-body">
+    <div class="dashboard-grid">
+        <!-- 실시간 채팅 -->
+        <div class="dashboard-section">
+            <div class="section-title">💬 실시간 채팅</div>
+            <div id="chat-messages" class="chat-messages" style="height: 300px; overflow-y: auto;">
+                <!-- 채팅 메시지들 -->
+            </div>
+        </div>
+        
+        <!-- 통계 -->
+        <div class="dashboard-section">
+            <div class="section-title">📊 방송 통계</div>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-icon">💬</div>
+                    <div class="stat-value" id="messages-count">0</div>
+                    <div class="stat-label">메시지</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-value" id="followers-count">0</div>
+                    <div class="stat-label">팔로워</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">🎁</div>
+                    <div class="stat-value" id="gifts-count">0</div>
+                    <div class="stat-label">선물</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-icon">⏱️</div>
+                    <div class="stat-value" id="uptime">00:00:00</div>
+                    <div class="stat-label">방송시간</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 목표 추적 -->
+        <div class="dashboard-section">
+            <div class="section-title">🎯 목표 달성</div>
+            <div id="goal-section">
+                <div class="goal-info">
+                    <div class="goal-title" id="goal-title">목표를 설정해보세요!</div>
+                    <div class="goal-description" id="goal-description">방송 목표를 달성해 나가세요.</div>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-text">
+                        <span id="current-value">0</span> / <span id="target-value">100</span>
+                        (<span id="progress-percent">0</span>%)
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 최근 알림 -->
+        <div class="dashboard-section">
+            <div class="section-title">🔔 최근 알림</div>
+            <div id="recent-alerts" style="height: 300px; overflow-y: auto;">
+                <!-- 최근 알림들 -->
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/js/overlay-websocket.js"></script>
+    <script>
+        const dashboard = new OverlayWebSocket('{{ websocket_url }}');
+        
+        // 채팅 메시지 처리
+        dashboard.on('new_comment', function(data) {
+            addChatMessage(data);
+        });
+        
+        // 통계 업데이트
+        dashboard.on('stats_update', function(data) {
+            updateStats(data);
+        });
+        
+        // 목표 업데이트
+        dashboard.on('goal_update', function(data) {
+            updateGoal(data);
+        });
+        
+        // 새 팔로우 알림
+        dashboard.on('new_follow', function(data) {
+            addAlert('follow', `🎉 ${data.nickname}님이 팔로우했습니다!`);
+        });
+        
+        // 선물 알림
+        dashboard.on('new_gift', function(data) {
+            const message = `🎁 ${data.nickname}님이 ${data.gift_name} ${data.gift_count}개를 보냈습니다!`;
+            addAlert('gift', message);
+        });
+        
+        function addChatMessage(data) {
+            const container = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message';
+            
+            const timestamp = new Date(data.timestamp).toLocaleTimeString();
+            messageDiv.innerHTML = `
+                <div class="message-header">
+                    <span class="username">${escapeHtml(data.nickname || data.username)}</span>
+                    <span class="timestamp">${timestamp}</span>
+                </div>
+                <div class="message-content">${escapeHtml(data.comment)}</div>
+            `;
+            
+            container.appendChild(messageDiv);
+            
+            // 메시지 수 제한
+            const messages = container.querySelectorAll('.chat-message');
+            if (messages.length > 20) {
+                messages[0].remove();
+            }
+            
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        function updateStats(stats) {
+            document.getElementById('messages-count').textContent = stats.messages_received || 0;
+            document.getElementById('followers-count').textContent = stats.followers_gained || 0;
+            document.getElementById('gifts-count').textContent = stats.gifts_received || 0;
+            
+            if (stats.uptime) {
+                document.getElementById('uptime').textContent = stats.uptime;
+            }
+        }
+        
+        function updateGoal(goal) {
+            if (!goal || !goal.active) return;
+            
+            document.getElementById('goal-title').textContent = goal.title || '목표';
+            document.getElementById('goal-description').textContent = goal.description || '';
+            
+            const current = goal.current || 0;
+            const target = goal.target || 100;
+            const percent = Math.min(100, Math.round((current / target) * 100));
+            
+            document.getElementById('current-value').textContent = current;
+            document.getElementById('target-value').textContent = target;
+            document.getElementById('progress-percent').textContent = percent;
+            document.getElementById('progress-fill').style.width = percent + '%';
+        }
+        
+        function addAlert(type, message) {
+            const container = document.getElementById('recent-alerts');
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `recent-alert alert-${type}`;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            alertDiv.innerHTML = `
+                <div class="alert-content">${message}</div>
+                <div class="alert-time">${timestamp}</div>
+            `;
+            
+            container.insertBefore(alertDiv, container.firstChild);
+            
+            // 알림 수 제한
+            const alerts = container.querySelectorAll('.recent-alert');
+            if (alerts.length > 10) {
+                alerts[alerts.length - 1].remove();
+            }
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

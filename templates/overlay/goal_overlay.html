@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikBot - 목표 오버레이</title>
+    <link rel="stylesheet" href="/static/css/overlay.css">
+</head>
+<body class="overlay-body">
+    <div id="goal-container" class="goal-container" style="display: none;">
+        <h3 class="overlay-title">🎯 목표 달성</h3>
+        
+        <div class="goal-info">
+            <div class="goal-title" id="goal-title">팔로워 100명 달성!</div>
+            <div class="goal-description" id="goal-description">현재 목표를 향해 달려갑니다!</div>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+            </div>
+            <div class="progress-text">
+                <span id="current-value">0</span> / <span id="target-value">100</span>
+                (<span id="progress-percent">0</span>%)
+            </div>
+        </div>
+    </div>
+    
+    <script src="/static/js/overlay-websocket.js"></script>
+    <script>
+        const goalOverlay = new OverlayWebSocket('{{ websocket_url }}');
+        
+        goalOverlay.on('goal_update', function(data) {
+            updateGoal(data);
+        });
+        
+        function updateGoal(goal) {
+            const container = document.getElementById('goal-container');
+            
+            if (!goal || !goal.active) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            
+            document.getElementById('goal-title').textContent = goal.title || '목표';
+            document.getElementById('goal-description').textContent = goal.description || '';
+            
+            const current = goal.current || 0;
+            const target = goal.target || 100;
+            const percent = Math.min(100, Math.round((current / target) * 100));
+            
+            document.getElementById('current-value').textContent = current;
+            document.getElementById('target-value').textContent = target;
+            document.getElementById('progress-percent').textContent = percent;
+            
+            const progressFill = document.getElementById('progress-fill');
+            progressFill.style.width = percent + '%';
+            
+            // 목표 달성 애니메이션
+            if (percent >= 100) {
+                progressFill.classList.add('goal-completed');
+                setTimeout(() => {
+                    container.classList.add('goal-achieved');
+                }, 500);
+            }
+        }
+    </script>
+</body>
+</html>
